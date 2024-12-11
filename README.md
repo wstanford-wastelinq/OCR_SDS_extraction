@@ -74,7 +74,7 @@ https://ceudnjpezzgutjocg27jsfihtu0soyic.lambda-url.us-east-2.on.aws/
 The function expects a JSON event with the following structure:
 ```json
 {
-    "bucket": "textract-console-us-east-2-8a84b6c0-d3c2-420d-8d03-9d742797b315",
+    "bucket": "S3_bucket",
     "document": "path_to_your_pdf.pdf"
 }
 ```
