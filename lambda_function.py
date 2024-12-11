@@ -15,11 +15,6 @@ def lambda_handler_full(event, context):
     # Initialize AWS clients
     textract = boto3.client('textract')
     s3 = boto3.client('s3')
-
-    event = {
-        'bucket':'textract-console-us-east-2-8a84b6c0-d3c2-420d-8d03-9d742797b315',
-        "document":'5014e3c4_f3de_4190_ba69_6528f4a0f5eb_benjamin_moore_advance_matte.pdf'
-    }
     
     try:
         # Validate input
