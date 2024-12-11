@@ -6,8 +6,7 @@ import time
 from openai import OpenAI
 import logging
 
-bucket = 'https://textract-console-us-east-2-8a84b6c0-d3c2-420d-8d03-9d742797b315.s3.us-east-2.amazonaws.com/'
-document = '5014e3c4_f3de_4190_ba69_6528f4a0f5eb_benjamin_moore_advance_matte.pdf'
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
