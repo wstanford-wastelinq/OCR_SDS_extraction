@@ -154,7 +154,3 @@ For issues and questions:
 1. Check CloudWatch logs for detailed error messages
 2. Review the Lambda function configuration
 3. Verify all environment variables are set correctly (You need an OpenAI API key)
-
-## License
-
-[Your license information here]
