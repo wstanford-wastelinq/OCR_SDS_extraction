@@ -6,6 +6,10 @@ import time
 from openai import OpenAI
 import logging
 
+# event = {
+#    'bucket':'textract-console-us-east-2-8a84b6c0-d3c2-420d-8d03-9d742797b315',
+#    "document":'6659c932_040b_4418_87e0_5cb80ab0680e_benjamin_moore_advance_matte.pdf'
+#}
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,6 +22,7 @@ def lambda_handler_full(event, context):
         "bucket": "S3_bucket",
         "document": "path_to_your_pdf.pdf"
     }
+    """
     
     # Initialize AWS clients
     textract = boto3.client('textract')
