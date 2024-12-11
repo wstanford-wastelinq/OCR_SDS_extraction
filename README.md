@@ -96,6 +96,7 @@ The function returns a JSON object with the following structure:
     ]
 }
 ```
+In my testing, the longest document took ~6 minutes to finish processing, most take 2-3 minutes.
 
 ## Error Handling
 
