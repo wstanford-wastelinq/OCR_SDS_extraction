@@ -11,6 +11,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def lambda_handler_full(event, context):
+
+    """
+    event should contain: 
+    {
+        "bucket": "S3_bucket",
+        "document": "path_to_your_pdf.pdf"
+    }
+    
     # Initialize AWS clients
     textract = boto3.client('textract')
     s3 = boto3.client('s3')
