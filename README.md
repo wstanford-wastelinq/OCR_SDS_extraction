@@ -62,13 +62,20 @@ Set up the following environment variables in your Lambda function:
 
 - `OPENAI_API_KEY`: Your OpenAI API key
 
+## Function URL
+
+The function is accessible via the following URL:
+```
+https://ceudnjpezzgutjocg27jsfihtu0soyic.lambda-url.us-east-2.on.aws/
+```
+
 ## Function Input
 
-The function expects an event with the following structure:
+The function expects a JSON event with the following structure:
 ```json
 {
-    'bucket': "S3_Storage_Bucket",
-    'document: "SDS_document.pdf"
+    "bucket": "textract-console-us-east-2-8a84b6c0-d3c2-420d-8d03-9d742797b315",
+    "document": "path_to_your_pdf.pdf"
 }
 ```
 
