@@ -14,7 +14,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def lambda_handler_full(event, context):
+def lambda_handler(event, context):
 
     """
     event should contain: 
@@ -23,10 +23,11 @@ def lambda_handler_full(event, context):
         "document": "path_to_your_pdf.pdf"
     }
     """
-    
     # Initialize AWS clients
     textract = boto3.client('textract')
     s3 = boto3.client('s3')
+
+
     
     try:
         # Validate input
@@ -39,6 +40,7 @@ def lambda_handler_full(event, context):
         bucket = event['bucket']
         document = event['document']
         
+        print(f'Starting job with document: {document}')
         # Validate document exists in S3
         try:
             s3.head_object(Bucket=bucket, Key=document)
@@ -68,7 +70,7 @@ def lambda_handler_full(event, context):
                     'Name': document
                 }
             },
-            FeatureTypes=['TABLES', 'QUERIES'],
+            FeatureTypes=['TABLES', 'FORMS', 'QUERIES'],
             QueriesConfig={
                 'Queries': queries
             }
@@ -175,9 +177,13 @@ def lambda_handler_full(event, context):
             }
         }
         
-        print(f"Final result: {json.dumps(result, indent=2, default=str)}")
+        print(f"Extracted information: {json.dumps(result, indent=2, default=str)}")
+
+        analyzed_results = analyze_results_with_LLM(result)
+
+        print(f"Analyzed results: {json.dumps(analyzed_results, indent=2, default=str)}")
         
-        return json.dumps(result)
+        return json.dumps(analyzed_results)
             
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -241,12 +247,9 @@ def extract_table_data(table_block, blocks_map):
     
     return table if table else None
 
-
-def lambda_handler(event, context):
+def lambda_handler_test(event, context):
 
     extracted_information = {"tables": [[["Product Name", "ADVANCE MATTE FINISH BASE 3"], ["Product Code", "7913X"], ["Alternate Product Code", "7913X"], ["Product Class", "Water thinned paint"], ["Color", "All"], ["Recommended use", "Paint"], ["Restrictions on use", "No information available"]], [["Chemical name", "CAS No.", "Weight-%"], ["Nepheline syenite", "37244-96-5", "10 15"], ["Limestone", "1317-65-3", "5 10"], ["Kaolin, calcined", "92704-41-1", "5 10"], ["Titanium dioxide", "13463-67-7", "1 5"], ["Silicon dioxide, wax coated", "112926-00-8", "1 5"], ["Talc", "14807-96-6", "1 5"], ["Polyalkylene glycol alkyl ether", "-", "1 5"], ["Propylene glycol", "57-55-6", "1 - 5"]], [["General Advice", "No hazards which require special first aid measures."], ["Eye Contact", "Rinse thoroughly with plenty of water for at least 15 minutes and consult a physician."], ["Skin Contact", "Wash off immediately with soap and plenty of water while removing all contaminated clothes and shoes."], ["Inhalation", "Move to fresh air. If symptoms persist, call a physician."], ["Ingestion", "Clean mouth with water and afterwards drink plenty of water. Consult a physician if necessary."], ["Most Important Symptoms/Effects", "None known."], ["Notes To Physician", "Treat symptomatically."]], [["5. FIRE-FIGHTING", "MEASURES"], ["Suitable Extinguishing Media", "Use extinguishing measures that are appropriate to local circumstances and the surrounding environment."], ["Protective equipment and precautions for firefighters", "As in any fire, wear self-contained breathing apparatus pressure-demand, MSHA/NIOSH (approved or equivalent) and full protective gear."], ["Specific Hazards Arising From The Chemical", "Closed containers may rupture if exposed to fire or extreme heat."], ["Sensitivity to mechanical impact", "No"], ["Sensitivity to static discharge", "No"], ["Flash Point Data", ""], ["Flash point (F)", "Not applicable"], ["Flash Point (C)", "Not applicable"], ["Method", "Not applicable"]], [["Personal Precautions", "Avoid contact with skin, eyes and clothing. Ensure adequate ventilation."], ["Other Information", "Prevent further leakage or spillage if safe to do SO."], ["Environmental precautions", "See Section 12 for additional Ecological Information."], ["Methods for Cleaning Up", "Soak up with inert absorbent material. Sweep up and shovel into suitable containers for disposal."]], [["", "7. HANDLING AND STORAGE"], ["Handling", "Avoid contact with skin, eyes and clothing. Avoid breathing vapors, spray mists or sanding dust. In case of insufficient ventilation, wear suitable respiratory equipment."], ["Storage", "Keep container tightly closed. Keep out of the reach of children."], ["Incompatible Materials", "No information available"]], [["Chemical name", "ACGIH TLV", "OSHA PEL"], ["Limestone", "N/E", "15 mg/m\u00b3 TWA 5 mg/m\u00b3 TWA"], ["Titanium dioxide", "10 mg/m\u00b3 TWA", "15 mg/m\u00b3 TWA"], ["Silicon dioxide, wax coated", "N/E", "20 mppcf TWA -"], ["Talc", "2 mg/m\u00b3 TWA", "20 mppcf TWA"]], [["Eye/Face Protection", "Safety glasses with side-shields."], ["Skin Protection", "Protective gloves and impervious clothing."], ["Respiratory Protection", "In case of insufficient ventilation wear suitable respiratory equipment."], ["Hygiene Measures", "Avoid contact with skin, eyes and clothing. Remove and wash contaminated clothing before re-use. Wash thoroughly after handling."]], [["Appearance", "liquid"], ["Odor", "little or no odor"], ["Odor Threshold", "No information available"], ["Density (lbs/gal)", "10.7 11.1"], ["Specific Gravity", "1.28 1.33"], ["pH", "No information available"], ["Viscosity (cps)", "No information available"], ["Solubility(ies)", "No information available"], ["Water solubility", "No information available"], ["Evaporation Rate", "No information available"], ["Vapor pressure", "No information available"], ["Vapor density", "No information available"], ["Wt. % Solids", "50 60"], ["Vol. % Solids", "40 50"], ["Wt. % Volatiles", "40 50"], ["Vol. % Volatiles", "50 60"], ["VOC Regulatory Limit (g/L)", "< 50"], ["Boiling Point (\u00b0F)", "212"], ["Boiling Point (C)", "100"], ["Freezing point (\u00b0F)", "32"], ["Freezing Point (C)", "0"], ["Flash point (\u00b0F)", "Not applicable"], ["Flash Point (C)", "Not applicable"], ["Method", "Not applicable"], ["Flammability (solid, gas)", "Not applicable"], ["Upper flammability limit:", "Not applicable"], ["Lower flammability limit:", "Not applicable"], ["Autoignition Temperature (\u00b0F)", "No information available"], ["Autoignition Temperature (C)", "No information available"], ["Decomposition Temperature (\u00b0F)", "No information available"], ["Decomposition Temperature (C)", "No information available"], ["Partition coefficient", "No information available"]], [["Conditions to avoid", "Prevent from freezing."], ["Incompatible Materials", "No materials to be especially mentioned."], ["Hazardous Decomposition Products", "None under normal use."], ["Possibility of hazardous reactions", "None under normal conditions of use."]], [["Eye contact", "May cause slight irritation."], ["Skin contact", "Substance may cause slight skin irritation. Prolonged or repeated contact may dry skin and cause irritation."], ["Inhalation", "Inhalation of vapors in high concentration may cause irritation of respiratory system. Avoid breathing vapors or mists."], ["Ingestion", "Ingestion may cause gastrointestinal irritation, nausea, vomiting and diarrhea."], ["Sensitization", "No information available"], ["Neurological Effects", "No information available."], ["Mutagenic Effects", "No information available."], ["Reproductive Effects", "No information available."], ["Developmental Effects", "No information available."], ["Target organ effects", "No information available."], ["STOT - single exposure", "No information available."], ["STOT - repeated exposure", "No information available."], ["Other adverse effects", "No information available."], ["Aspiration Hazard", "No information available"]], [["Chemical name", "Oral LD50", "Dermal LD50", "Inhalation LC50"], ["Kaolin, calcined 92704-41-1", "> 2000 mg/kg (Rat)", "-", ""]], [["Titanium dioxide 13463-67-7", "> 10000 mg/kg ( Rat)", "", "-"], ["Propylene glycol 57-55-6", "= 20 g/kg ( Rat)", "= 20800 mg/kg ( Rabbit", "-"]], [["Chemical name", "IARC", "NTP", "OSHA"], ["Titanium dioxide", "2B - Possible Human Carcinogen", "", "Listed"]], [["", "14. TRANSPORT INFORMATION"], ["DOT", "Not regulated"], ["ICAO / IATA", "Not regulated"], ["IMDG / IMO", "Not regulated"]], [["Acute health hazard", "No"], ["Chronic Health Hazard", "No"], ["Fire hazard", "No"], ["Sudden release of pressure hazard", "No"], ["Reactive Hazard", "No"]], [["Chemical name", "Massachusetts", "New Jersey", "Pennsylvania"], ["Limestone", "", "", ""], ["Titanium dioxide", "", "", ""], ["Silicon dioxide, wax coated", "", "", ""], ["Talc", "", "", ""]]], "query_results": [{"query": "What is the CAS number for this product?", "answer": "No match found", "confidence": 0}, {"query": "What is the CAS no. listed?", "answer": "No match found", "confidence": 0}, {"query": "What are the ingredient names in this product?", "answer": "No match found", "confidence": 0}, {"query": "What is the chemical name shown?", "answer": "No match found", "confidence": 0}, {"query": "What is the chemical composition of this product?", "answer": "No match found", "confidence": 0}, {"query": "List the CAS number", "answer": "No match found", "confidence": 0}, {"query": "Show me the ingredients", "answer": "No match found", "confidence": 0}, {"query": "What chemicals are in this product?", "answer": "No match found", "confidence": 0}], "debug_info": {"total_blocks": 2816, "table_blocks_found": 17, "submitted_queries": [{"Text": "What is the CAS number for this product?"}, {"Text": "What is the CAS no. listed?"}, {"Text": "What are the ingredient names in this product?"}, {"Text": "What is the chemical name shown?"}, {"Text": "What is the chemical composition of this product?"}, {"Text": "List the CAS number"}, {"Text": "Show me the ingredients"}, {"Text": "What chemicals are in this product?"}]}}
-
-
     results = analyze_results_with_LLM(extracted_information)
 
     return json.dumps(results)
@@ -285,6 +288,11 @@ def analyze_results_with_LLM(extracted_information):
             {
                 "role": "user",
                 "content": f"""Analyze this document data and extract all chemicals and their CAS numbers in JSON format, only return the JSON.
+                There may not always be a CAS number associated with the chemicals, still return the chemical name. 
+                Also, if there is weight information (Weight %, or Wt. %), return the "Min" and "Max" weight for each chemical. 
+                Sometimes this is displayed in a range "x - y", where x is "Min" and y is "Max". 
+                If it's a single value, use the same value for both. 
+                This could also be displayed using "<" or ">" signs, interpret these appropriately.
                 Here is the document data to analyze: {extracted_information}"""
             }
         ]
@@ -296,6 +304,7 @@ def analyze_results_with_LLM(extracted_information):
             max_tokens=10000,
             temperature=0.1
         )
+        
         # Extract and parse the response
         answer = response.choices[0].message.content
         parsed_answer = json.loads(answer)
@@ -304,10 +313,7 @@ def analyze_results_with_LLM(extracted_information):
         if 'chemicals' not in parsed_answer:
             parsed_answer = {'chemicals': []}
         
-        return {
-            'statusCode': 200,
-            'body': json.dumps(parsed_answer)
-        }
+        return parsed_answer
 
     except Exception as e:
         logger.error(f"Error: {str(e)}")
